@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iPAS AI 應用規劃師歷屆試題閱讀器</title>
+  
+  <!-- Noto Sans TC & Inter Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Menu -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <div class="logo-icon">
+            <i class="fa-solid fa-brain-circuit"></i>
+          </div>
+          <div class="logo-text">
+            <h1>iPAS AI</h1>
+            <span class="sub-logo">應用規劃師 • 歷屆試題</span>
+          </div>
+        </div>
+        <button class="mobile-close-btn" id="mobile-close-btn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Search Box -->
+      <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="搜尋考科或年份關鍵字..." autocomplete="off">
+        <button id="search-clear-btn" class="search-clear-btn" style="display: none;">
+          <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Filter Sections -->
+      <div class="filter-wrapper">
+        <!-- Grade Filter -->
+        <div class="filter-group">
+          <span class="filter-label">考試級別</span>
+          <div class="filter-pills" id="grade-filters">
+            <button class="filter-pill active" data-grade="all">全部</button>
+            <button class="filter-pill" data-grade="初級">初級</button>
+            <button class="filter-pill" data-grade="中級">中級</button>
+          </div>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="filter-group">
+          <span class="filter-label">年份</span>
+          <div class="filter-pills" id="year-filters">
+            <button class="filter-pill active" data-year="all">全部</button>
+            <button class="filter-pill" data-year="114">114 年</button>
+            <button class="filter-pill" data-year="115">115 年</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable Exam List -->
+      <div class="exam-list-container">
+        <div class="exam-list-header">
+          <span class="list-count" id="list-count">共 12 份試題</span>
+          <button class="reset-progress-btn" id="reset-progress-btn" title="重設閱讀進度">
+            <i class="fa-solid fa-rotate-left"></i> 重設進度
+          </button>
+        </div>
+        <ul class="exam-list" id="exam-list">
+          <!-- Loaded dynamically via app.js -->
+        </ul>
+      </div>
+
+      <!-- Sidebar Footer (Stats Overview) -->
+      <div class="sidebar-footer">
+        <div class="progress-info">
+          <div class="progress-labels">
+            <span>閱讀進度</span>
+            <span id="progress-percentage">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%"></div>
+          </div>
+          <div class="progress-stats">
+            <span id="progress-text">已閱讀 0 / 12 份</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Mobile Top Bar -->
+      <header class="mobile-header">
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="mobile-title">iPAS AI 歷屆試題</span>
+      </header>
+
+      <!-- Welcome panel (Shown when no PDF is active) -->
+      <section class="welcome-panel" id="welcome-panel">
+        <div class="welcome-content">
+          <div class="welcome-badge">經濟部 iPAS 證照考試</div>
+          <h2 class="welcome-title">AI 應用規劃師 歷屆試題庫</h2>
+          <p class="welcome-subtitle">歡迎使用試題閱讀器，請從左側選單選擇欲閱讀的 PDF 考古題。系統將自動記錄您的閱讀進度，協助您完成證照衝刺！</p>
+          
+          <!-- Statistics Cards Grid -->
+          <div class="stats-grid">
+            <div class="stats-card">
+              <div class="stats-icon primary">
+                <i class="fa-solid fa-file-pdf"></i>
+              </div>
+              <div class="stats-info">
+                <span class="stats-val">12 份</span>
+                <span class="stats-lbl">收錄試題總數</span>
+              </div>
+            </div>
+            
+            <div class="stats-card">
+              <div class="stats-icon success">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <div class="stats-info">
+                <span class="stats-val">6 份</span>
+                <span class="stats-lbl">初級概論與 GenAI</span>
+              </div>
+            </div>
+            
+            <div class="stats-card">
+              <div class="stats-icon warning">
+                <i class="fa-solid fa-diagram-project"></i>
+              </div>
+              <div class="stats-info">
+                <span class="stats-val">6 份</span>
+                <span class="stats-lbl">中級技術/大數據/ML</span>
+              </div>
+            </div>
+
+            <div class="stats-card">
+              <div class="stats-icon info">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="stats-info">
+                <span class="stats-val" id="stats-read-count">0 / 12</span>
+                <span class="stats-lbl">完成閱讀試題</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature Description List -->
+          <div class="feature-info-section">
+            <h3>系統特色與操作提示</h3>
+            <ul class="feature-list">
+              <li>
+                <div class="feat-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                <div class="feat-text">
+                  <strong>智慧搜尋篩選：</strong>您可以輸入「初級」、「中級」、「114」、「115」或「大數據」等關鍵字，快速找出目標試題。
+                </div>
+              </li>
+              <li>
+                <div class="feat-icon"><i class="fa-solid fa-book-open"></i></div>
+                <div class="feat-text">
+                  <strong>無縫嵌入閱讀：</strong>選取後 PDF 將直接在右側展開，無須額外下載開啟，閱讀更流暢。
+                </div>
+              </li>
+              <li>
+                <div class="feat-icon"><i class="fa-solid fa-floppy-disk"></i></div>
+                <div class="feat-text">
+                  <strong>進度狀態留存：</strong>系統會自動儲存您的閱讀狀態，再次開啟網頁時依然可繼續未完成的進度。
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- PDF Viewer Panel (Shown when a PDF is selected) -->
+      <section class="viewer-panel" id="viewer-panel" style="display: none;">
+        <div class="viewer-header">
+          <div class="viewer-meta">
+            <button class="back-to-menu-btn" id="back-to-menu-btn" title="返回選單 (僅在行動裝置顯示)">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <div class="viewer-title-group">
+              <div class="viewer-tags" id="viewer-tags">
+                <!-- Loaded dynamically -->
+              </div>
+              <h2 class="viewer-title" id="viewer-title">試題標題</h2>
+            </div>
+          </div>
+          
+          <div class="viewer-actions">
+            <!-- Toggle Read Status -->
+            <button class="viewer-btn action-read" id="toggle-read-btn">
+              <i class="fa-regular fa-circle-check"></i>
+              <span class="btn-text">標記為已讀</span>
+            </button>
+            
+            <!-- Open in New Tab -->
+            <a href="" target="_blank" class="viewer-btn action-external" id="external-link">
+              <i class="fa-solid fa-up-right-from-square"></i>
+              <span class="btn-text">在新分頁開啟</span>
+            </a>
+            
+            <!-- Close PDF Viewer -->
+            <button class="viewer-btn action-close" id="close-viewer-btn" title="關閉檢視器">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- View Mode Tabs -->
+        <div class="viewer-tabs-bar">
+          <button class="tab-btn active" id="tab-btn-quiz" data-tab="quiz">
+            <i class="fa-solid fa-list-check"></i> 模擬測驗
+          </button>
+          <button class="tab-btn" id="tab-btn-pdf" data-tab="pdf">
+            <i class="fa-solid fa-file-pdf"></i> 閱讀 PDF
+          </button>
+        </div>
+        
+        <!-- Tab 1: Quiz Mode View -->
+        <div class="quiz-view-container" id="quiz-view-container">
+          <!-- Quiz Dashboard Stats -->
+          <div class="quiz-dashboard">
+            <div class="quiz-progress-section">
+              <div class="quiz-stat-item">
+                <span class="quiz-stat-label">答題進度</span>
+                <span class="quiz-stat-value" id="quiz-progress-text">0 / 50 題</span>
+              </div>
+              <div class="quiz-stat-item">
+                <span class="quiz-stat-label">答對數</span>
+                <span class="quiz-stat-value text-success" id="quiz-correct-text">0 題</span>
+              </div>
+              <div class="quiz-stat-item">
+                <span class="quiz-stat-label">答對率</span>
+                <span class="quiz-stat-value text-primary" id="quiz-accuracy-text">--%</span>
+              </div>
+            </div>
+            
+            <div class="quiz-controls">
+              <!-- Filter Starred -->
+              <button class="quiz-ctrl-btn" id="filter-starred-btn" title="只顯示已標記收藏的題目">
+                <i class="fa-regular fa-star"></i> 只看收藏
+              </button>
+              
+              <!-- Reset Quiz -->
+              <button class="quiz-ctrl-btn text-danger" id="reset-quiz-btn" title="清除本次作答狀態，重新測驗">
+                <i class="fa-solid fa-rotate-left"></i> 重做測驗
+              </button>
+            </div>
+          </div>
+
+          <!-- Question Cards Container -->
+          <div class="quiz-questions-list" id="quiz-questions-list">
+            <!-- Dynamic Question Cards Loaded via app.js -->
+          </div>
+        </div>
+        
+        <!-- Tab 2: PDF Mode View -->
+        <div class="iframe-container" id="iframe-view-container" style="display: none;">
+          <div class="iframe-loader" id="iframe-loader">
+            <div class="spinner"></div>
+            <p>PDF 載入中...</p>
+          </div>
+          <iframe id="pdf-iframe" src="" allow="autoplay"></iframe>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

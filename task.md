@@ -1,0 +1,4 @@
+- [x] Modify HTML structure in `index.html` (add tabs and quiz container)
+- [/] Add new quiz and tab styles in `style.css`
+- [ ] Update JavaScript logic in `app.js` (load JSON, render questions, handle answers, scoring, bookmarks, tab switching)
+- [ ] Verify functionality and responsiveness in browser
