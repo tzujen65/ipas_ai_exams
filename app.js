@@ -133,6 +133,18 @@ let starredQuestions = {};// keyed by exam id, value = Set of question indices
 let filterStarredMode = false;
 let currentTab = "quiz"; // "quiz" | "pdf"
 
+// CSV Analysis cache & mapping
+let examAnalyses = {}; // keyed by exam id, value = { questionNum: { concept, analysis } }
+const examCsvMapping = {
+  "114-4-elem-1": "Ai114_4.csv",
+  "114-4-elem-2": "GenAi114_4.csv",
+  "115-1-elem-1": "Ai115_1.csv",
+  "115-1-elem-2": "GenAi115_1.csv",
+  "115-2-elem-1": "Ai115_2.csv",
+  "115-2-elem-2": "GenAi115_2.csv"
+};
+
+
 // ===================================================================
 // DOM Element References
 // ===================================================================
@@ -372,6 +384,64 @@ function renderExamList() {
 }
 
 // ===================================================================
+// CSV Loading and Parsing (Question Analysis)
+// ===================================================================
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+async function loadCsvAnalysis(examId) {
+  const csvName = examCsvMapping[examId];
+  if (!csvName) return; // No CSV mapped
+  if (examAnalyses[examId]) return; // Already loaded
+
+  try {
+    const response = await fetch(csvName);
+    if (!response.ok) {
+      console.warn(`Failed to fetch CSV: ${csvName}`);
+      return;
+    }
+    const text = await response.text();
+    const lines = text.split(/\r?\n/);
+    const parsedData = {};
+
+    // Skip header line
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      const columns = parseCSVLine(line);
+      if (columns.length >= 4) {
+        const qNum = parseInt(columns[0]);
+        if (!isNaN(qNum)) {
+          parsedData[qNum] = {
+            concept: columns[2],
+            analysis: columns[3]
+          };
+        }
+      }
+    }
+    examAnalyses[examId] = parsedData;
+  } catch (e) {
+    console.error(`Error parsing CSV ${csvName}:`, e);
+  }
+}
+
+// ===================================================================
 // Exam Selection
 // ===================================================================
 function selectExam(id) {
@@ -407,6 +477,13 @@ function selectExam(id) {
 
   // Show quiz tab by default
   switchTab("quiz");
+
+  // Load CSV analysis if mapping exists
+  loadCsvAnalysis(id).then(() => {
+    if (activeExamId === id && currentTab === "quiz") {
+      renderQuiz(id);
+    }
+  });
 
   // Close mobile sidebar
   closeMobileSidebar();
@@ -523,6 +600,31 @@ function renderQuiz(examId) {
     const revealDisabled = answered || revealed;
     const revealBtnClass = revealed ? "reveal-btn revealed" : "reveal-btn";
 
+    // Find and construct CSV analysis explanation if available and question is completed
+    const hasAnalysis = answered || revealed;
+    let analysisHTML = "";
+    if (hasAnalysis && examAnalyses[examId] && examAnalyses[examId][i + 1]) {
+      const item = examAnalyses[examId][i + 1];
+      analysisHTML = `
+        <div class="question-analysis-card animate-slide-down">
+          <div class="analysis-header">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>分析說明</span>
+          </div>
+          <div class="analysis-body">
+            <div class="analysis-row">
+              <span class="analysis-label">題目核心觀念</span>
+              <span class="analysis-concept">${item.concept}</span>
+            </div>
+            <div class="analysis-row">
+              <span class="analysis-label">正確原因分析</span>
+              <span class="analysis-detail">${item.analysis}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     return `
       <div class="question-card" id="qcard-${i}" data-q-index="${i}">
         <div class="question-card-header">
@@ -546,6 +648,7 @@ function renderQuiz(examId) {
           </button>
           ${(answered || revealed) ? `<span class="correct-answer-badge">正確答案：<strong>${correctLetter}</strong></span>` : ""}
         </div>
+        ${analysisHTML}
       </div>
     `;
   }).join("");
