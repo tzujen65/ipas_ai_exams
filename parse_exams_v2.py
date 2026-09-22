@@ -3,7 +3,7 @@ import re
 import json
 import pypdf
 
-pdf_dir = "/Users/rex/Desktop/iPAS/ipas_ai_exams"
+pdf_dir = os.path.dirname(os.path.abspath(__file__))
 pdf_files = [f for f in os.listdir(pdf_dir) if f.endswith(".pdf")]
 pdf_files.sort()
 
@@ -139,7 +139,7 @@ for file in pdf_files:
     except Exception as e:
         print(f"Error parsing {file}: {e}")
 
-output_path = "/Users/rex/Desktop/iPAS/ipas_ai_exams/exams_data.json"
+output_path = os.path.join(pdf_dir, "exams_data.json")
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(all_exams_data, f, ensure_ascii=False, indent=2)
 

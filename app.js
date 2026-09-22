@@ -111,6 +111,24 @@ const examFiles = [
     term: "第二次",
     grade: "初級",
     subject: "第二科"
+  },
+  {
+    id: "115-3-elem-1",
+    fileName: "115年第三次初級AI應用規劃師_第一科_人工智慧基礎概論_公告試題_20260906220418.pdf",
+    title: "第一科 人工智慧基礎概論",
+    year: "115",
+    term: "第三次",
+    grade: "初級",
+    subject: "第一科"
+  },
+  {
+    id: "115-3-elem-2",
+    fileName: "115年第三次初級AI應用規劃師_第二科_生成式AI應用與規劃_公告試題_20260906220452.pdf",
+    title: "第二科 生成式AI應用與規劃",
+    year: "115",
+    term: "第三次",
+    grade: "初級",
+    subject: "第二科"
   }
 ];
 
